@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoldenBikes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --gold: #c9963a; --gold-light: #d4a843; }
+
+    body {
+      background: #ffffff;
+      color: #111;
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      padding: 32px 24px 64px;
+      max-width: 600px;
+      margin: 0 auto;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.fosc { background: #1a1a1a; color: #e8e8e8; }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      margin-bottom: 20px;
+    }
+
+    #toggleMode {
+      background: transparent;
+      border: 1px solid #aaa;
+      border-radius: 4px;
+      padding: 6px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      cursor: pointer;
+      color: inherit;
+      margin-bottom: 8px;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    body.fosc #toggleMode { border-color: #555; }
+    #toggleMode:hover { background: var(--gold); color: #111; border-color: var(--gold); }
+
+    #btnCompartir {
+      background: transparent;
+      border: 1px solid #aaa;
+      border-radius: 4px;
+      padding: 6px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      cursor: pointer;
+      color: inherit;
+      margin-bottom: 20px;
+      margin-left: 8px;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    body.fosc #btnCompartir { border-color: #555; }
+    #btnCompartir:hover { background: var(--gold); color: #111; border-color: var(--gold); }
+
+    .subtitol { font-size: 1rem; color: #555; margin-bottom: 28px; }
+    body.fosc .subtitol { color: #999; }
+
+    h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.7rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    #serveisList {
+      list-style: disc;
+      padding-left: 22px;
+      margin-bottom: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    #serveisList li {
+      font-size: 1.15rem;
+      color: var(--gold-light);
+      font-weight: 500;
+      animation: fadeIn 0.35s ease both;
+      padding: 2px 0;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(-12px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .add-form { display: flex; gap: 10px; align-items: stretch; margin-bottom: 48px; }
+
+    #nouServei {
+      flex: 1;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 10px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      color: inherit;
+      background: transparent;
+      outline: none;
+      transition: border-color 0.2s, background 0.3s;
+    }
+    body.fosc #nouServei { border-color: #444; background: #2a2a2a; color: #e8e8e8; }
+    #nouServei::placeholder { color: #aaa; }
+    #nouServei:focus { border-color: var(--gold); }
+
+    button.afegir {
+      background: transparent;
+      color: inherit;
+      border: 1px solid #aaa;
+      border-radius: 4px;
+      padding: 10px 20px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    body.fosc button.afegir { border-color: #555; }
+    button.afegir:hover { background: var(--gold); color: #111; border-color: var(--gold); }
+
+    .separator { border: none; border-top: 1px solid #ddd; margin-bottom: 16px; }
+    body.fosc .separator { border-color: #333; }
+
+    .seccio-desplegable { margin-bottom: 8px; }
+    .desplegable-cap {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid #eee;
+      padding: 16px 0;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: inherit;
+      cursor: pointer;
+      text-align: left;
+    }
+    body.fosc .desplegable-cap { border-color: #333; }
+    .fletxa { font-size: 1rem; color: var(--gold); transition: transform 0.3s; }
+    .fletxa.obert { transform: rotate(180deg); }
+    .desplegable-cos { display: none; padding-top: 20px; padding-bottom: 20px; }
+    .desplegable-cos.obert { display: block; }
+
+    .cal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .cal-header span {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .cal-nav {
+      background: transparent;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 34px; height: 34px;
+      font-size: 1rem;
+      cursor: pointer;
+      color: inherit;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    body.fosc .cal-nav { border-color: #444; }
+    .cal-nav:hover { background: var(--gold); color: #111; border-color: var(--gold); }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 20px;
+    }
+    .cal-day-name {
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #888;
+      padding-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .cal-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      user-select: none;
+    }
+    .cal-day:hover:not(.disabled):not(.empty) { border-color: var(--gold); color: var(--gold); }
+    .cal-day.selected { background: var(--gold); color: #111 !important; font-weight: 700; border-color: var(--gold); }
+    .cal-day.today { font-weight: 700; color: var(--gold); }
+    .cal-day.disabled { color: #ccc; cursor: default; }
+    body.fosc .cal-day.disabled { color: #444; }
+    .cal-day.empty { cursor: default; }
+
+    .hores-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 10px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    body.fosc .hores-label { color: #999; }
+
+    .hores-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .hora-btn {
+      padding: 10px 0;
+      text-align: center;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      cursor: pointer;
+      background: transparent;
+      color: inherit;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    body.fosc .hora-btn { border-color: #444; }
+    .hora-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .hora-btn.selected { background: var(--gold); color: #111; border-color: var(--gold); font-weight: 700; }
+
+    .cita-form { display: flex; flex-direction: column; gap: 12px; }
+    .cita-form input, .cita-form select, .cita-form textarea {
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 12px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      color: inherit;
+      background: transparent;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+    body.fosc .cita-form input,
+    body.fosc .cita-form select,
+    body.fosc .cita-form textarea { border-color: #444; background: #2a2a2a; color: #e8e8e8; }
+    .cita-form input::placeholder,
+    .cita-form textarea::placeholder { color: #aaa; }
+    .cita-form input:focus,
+    .cita-form select:focus,
+    .cita-form textarea:focus { border-color: var(--gold); }
+    body.fosc .cita-form select option { background: #2a2a2a; }
+    .cita-form textarea { resize: vertical; }
+
+    input[type="file"] {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      color: inherit;
+    }
+
+    .btn-reservar {
+      background: var(--gold);
+      color: #111;
+      border: none;
+      border-radius: 6px;
+      padding: 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.03em;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 4px;
+    }
+    .btn-reservar:hover { background: #e0aa50; }
+    .btn-reservar:active { transform: scale(0.98); }
+
+    .confirmacio {
+      display: none;
+      background: #f0faf0;
+      border: 1px solid #b2dfb2;
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin-top: 16px;
+      font-size: 0.97rem;
+      line-height: 1.6;
+      color: #2a6e2a;
+    }
+    body.fosc .confirmacio { background: #1a2e1a; border-color: #2a5e2a; color: #7ec87e; }
+    .confirmacio.visible { display: block; animation: fadeIn 0.4s ease; }
+    .confirmacio strong { display: block; font-size: 1.05rem; margin-bottom: 6px; }
+
+    .info-box {
+      background: #f9f9f9;
+      border-radius: 10px;
+      padding: 18px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    body.fosc .info-box { background: #222; }
+    .info-row { display: flex; gap: 14px; align-items: flex-start; }
+    .info-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
+    .info-row strong { display: block; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gold); margin-bottom: 4px; }
+    .info-row p { font-size: 0.97rem; line-height: 1.5; }
+
+    .contacte-botons { display: flex; gap: 12px; margin-bottom: 12px; }
+    .btn-contacte {
+      flex: 1;
+      text-align: center;
+      padding: 14px;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn-contacte:active { transform: scale(0.97); }
+    .btn-tel { background: var(--gold); color: #111; }
+    .btn-whatsapp { background: #25D366; color: #fff; }
+    .btn-tel:hover { opacity: 0.9; }
+    .btn-whatsapp:hover { opacity: 0.9; }
+
+    .btn-email {
+      background: #f0f0f0;
+      color: #111;
+      border-radius: 8px;
+      padding: 14px;
+      text-decoration: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+    body.fosc .btn-email { background: #2a2a2a; color: #e8e8e8; }
+    .btn-email:hover { opacity: 0.8; }
+
+    .mapa-container { border-radius: 10px; overflow: hidden; border: 1px solid #eee; }
+    body.fosc .mapa-container { border-color: #333; }
+
+    #consultaNom { padding: 16px; font-size: 1.1rem; }
+    #consultaText { padding: 16px; font-size: 1.1rem; min-height: 120px; }
+
+    .btn-flotant {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 58px;
+      height: 58px;
+      background: var(--gold);
+      color: #111;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      text-decoration: none;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      transition: transform 0.2s, background 0.2s;
+      z-index: 999;
+    }
+    .btn-flotant:hover { transform: scale(1.1); }
+    .btn-flotant:active { transform: scale(0.95); }
+  </style>
+</head>
+<body>
+
+  <h1>GoldenBikes</h1>
+  <button id="toggleMode" onclick="canviarMode()">Mode fosc / clar</button>
+  <button id="btnCompartir" onclick="compartirApp()">📤 Compartir la app</button>
+  <p class="subtitol">Especialistes en reparació desde 1996</p>
+
+  <hr class="separator">
+
+  <!-- CITA PRÈVIA -->
+  <div class="seccio-desplegable">
+    <button class="desplegable-cap" onclick="toggle('cita')">
+      <span>📅 Cita prèvia</span>
+      <span class="fletxa" id="fletxa-cita">▼</span>
+    </button>
+    <div class="desplegable-cos" id="cita">
+      <p class="subtitol">Tria el dia i l'hora que més et convingui</p>
+      <div class="cal-header">
+        <button class="cal-nav" onclick="canviarMes(-1)">&#8249;</button>
+        <span id="calTitol"></span>
+        <button class="cal-nav" onclick="canviarMes(1)">&#8250;</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div id="horesContainer" style="display:none">
+        <p class="hores-label">Tria una hora</p>
+        <div class="hores-grid" id="horesGrid"></div>
+        <div class="cita-form">
+          <input type="text" id="nomClient" placeholder="El teu nom i cognoms">
+          <input type="tel" id="telClient" placeholder="Telèfon de contacte">
+          <select id="serveiCita">
+            <option value="">— Selecciona un servei —</option>
+          </select>
+          <button class="btn-reservar" onclick="confirmarCita()">Confirmar cita</button>
+        </div>
+        <div class="confirmacio" id="confirmacio"></div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="separator">
+
+  <!-- ON SOM -->
+  <div class="seccio-desplegable">
+    <button class="desplegable-cap" onclick="toggle('onso')">
+      <span>📍 On som</span>
+      <span class="fletxa" id="fletxa-onso">▼</span>
+    </button>
+    <div class="desplegable-cos" id="onso">
+      <p class="subtitol">Vine a visitar-nos!</p>
+      <div class="info-box">
+        <div class="info-row">
+          <span class="info-icon">📌</span>
+          <div>
+            <strong>Adreça</strong>
+            <p>Carrer Anselm Clavé, 61<br>08530 La Garriga, Barcelona</p>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="info-icon">🕐</span>
+          <div>
+            <strong>Horari</strong>
+            <p>Dilluns a Divendres<br>9:00 – 13:30 · 16:30 – 20:00</p>
+          </div>
+        </div>
+      </div>
+      <div class="contacte-botons">
+        <a href="tel:665953779" class="btn-contacte btn-tel">📞 Trucar</a>
+        <a href="https://wa.me/34665953779" target="_blank" class="btn-contacte btn-whatsapp">💬 WhatsApp</a>
+      </div>
+      <a href="mailto:lagarriga@goldenbikes.es" class="btn-contacte btn-email" style="display:block; text-align:center; margin-bottom:20px;">📧 lagarriga@goldenbikes.es</a>
+      <div class="mapa-container">
+        <iframe src="https://maps.google.com/maps?q=Carrer+Anselm+Clav%C3%A9+61+La+Garriga+Barcelona&output=embed" width="100%" height="220" style="border:0; border-radius:10px;" allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <hr class="separator">
+
+  <!-- CONSULTES -->
+  <div class="seccio-desplegable">
+    <button class="desplegable-cap" onclick="toggle('consultes')">
+      <span>💬 Consultes</span>
+      <span class="fletxa" id="fletxa-consultes">▼</span>
+    </button>
+    <div class="desplegable-cos" id="consultes">
+      <p class="subtitol">Explica'ns el problema i envia'ns fotos de la teva bici</p>
+      <div class="cita-form">
+        <input type="text" id="consultaNom" placeholder="El teu nom">
+        <textarea id="consultaText" placeholder="Descriu el problema de la teva bici..." rows="4"></textarea>
+        <p class="hores-label">Grava un àudio (opcional)</p>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <button class="btn-reservar" id="btnGravar" onclick="iniciarGravacio()" style="margin-top:0; padding:10px 18px;">🎙️ Gravar</button>
+          <button class="btn-reservar" id="btnAturar" onclick="aturarGravacio()" style="margin-top:0; padding:10px 18px; display:none; background:#e05050;">⏹️ Aturar</button>
+          <span id="audioEtiquet" style="font-size:0.9rem; color:var(--gold);"></span>
+        </div>
+        <audio id="audioPreview" controls style="display:none; width:100%; margin-top:8px;"></audio>
+        <p class="hores-label">Afegeix fotos (opcional)</p>
+        <input type="file" id="consultaFotos" accept="image/*" multiple>
+        <button class="btn-reservar" onclick="enviarConsulta()">📲 Enviar per WhatsApp</button>
+      </div>
+    </div>
+  </div>
+
+  <hr class="separator">
+
+  <!-- SERVEIS -->
+  <h2>Els nostres serveis</h2>
+  <ul id="serveisList">
+    <li>Posada a punt general</li>
+    <li>Canvi de cables i funda</li>
+    <li>Ajust de canvis i frens</li>
+    <li>Canvi de cadena i plats</li>
+    <li>Reparació de punxades</li>
+    <li>Centrat de rodes</li>
+  </ul>
+
+  <div class="add-form">
+    <input type="text" id="nouServei" placeholder="Escriu un servei nou...">
+    <button class="afegir" onclick="afegirServei()">Afegir</button>
+  </div>
+
+  <a href="tel:665953779" class="btn-flotant">📞</a>
+
+  <script>
+    const serveisFixos = ["Posada a punt general", "Canvi de cables i funda", "Ajust de canvis i frens", "Canvi de cadena i plats", "Reparació de punxades", "Centrat de rodes"];
+    let serveis = [...serveisFixos];
+
+    function actualitzarSelectServeis() {
+      const sel = document.getElementById("serveiCita");
+      sel.innerHTML = '<option value="">— Selecciona un servei —</option>';
+      serveis.forEach(function(s) {
+        const opt = document.createElement("option");
+        opt.value = s; opt.textContent = s;
+        sel.appendChild(opt);
+      });
+    }
+    actualitzarSelectServeis();
+
+    function afegirServei() {
+      let text = document.getElementById("nouServei").value.trim();
+      if (!text) return;
+      let llista = document.querySelector("#serveisList");
+      let nouElement = document.createElement("li");
+      nouElement.textContent = text;
+      llista.appendChild(nouElement);
+      serveis.push(text);
+      actualitzarSelectServeis();
+      document.getElementById("nouServei").value = "";
+      document.getElementById("nouServei").focus();
+    }
+    document.getElementById("nouServei").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") afegirServei();
+    });
+
+    function canviarMode() {
+      document.body.classList.toggle("fosc");
+    }
+
+    function toggle(id) {
+      var cos = document.getElementById(id);
+      var fletxa = document.getElementById("fletxa-" + id);
+      if (cos) cos.classList.toggle("obert");
+      if (fletxa) fletxa.classList.toggle("obert");
+    }
+
+    const mesos = ["Gener","Febrer","Març","Abril","Maig","Juny","Juliol","Agost","Setembre","Octubre","Novembre","Desembre"];
+    const horesDisponibles = ["9:00","9:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","16:30","17:00","17:30","18:00","18:30","19:00","19:30","20:00"];
+
+    let avui = new Date();
+    let any = avui.getFullYear();
+    let mes = avui.getMonth();
+    let diaSeleccionat = null;
+    let horaSeleccionada = null;
+
+    function renderCalendari() {
+      document.getElementById("calTitol").textContent = mesos[mes] + " " + any;
+      const grid = document.getElementById("calGrid");
+      grid.innerHTML = "";
+
+      ["Dl","Dt","Dc","Dj","Dv","Ds","Dg"].forEach(function(d) {
+        const el = document.createElement("div");
+        el.className = "cal-day-name";
+        el.textContent = d;
+        grid.appendChild(el);
+      });
+
+      const primerDia = new Date(any, mes, 1).getDay();
+      const offset = (primerDia === 0) ? 6 : primerDia - 1;
+      const diesMes = new Date(any, mes + 1, 0).getDate();
+
+      for (let i = 0; i < offset; i++) {
+        const el = document.createElement("div");
+        el.className = "cal-day empty";
+        grid.appendChild(el);
+      }
+
+      for (let d = 1; d <= diesMes; d++) {
+        const el = document.createElement("div");
+        el.className = "cal-day";
+        el.textContent = d;
+        const data = new Date(any, mes, d);
+        const diaSemana = data.getDay();
+        const esPassat = data < new Date(avui.getFullYear(), avui.getMonth(), avui.getDate());
+        const esCapDeSemana = diaSemana === 0 || diaSemana === 6;
+
+        if (esPassat || esCapDeSemana) {
+          el.classList.add("disabled");
+        } else {
+          if (d === avui.getDate() && mes === avui.getMonth() && any === avui.getFullYear()) {
+            el.classList.add("today");
+          }
+          if (diaSeleccionat && diaSeleccionat.getDate() === d && diaSeleccionat.getMonth() === mes && diaSeleccionat.getFullYear() === any) {
+            el.classList.add("selected");
+          }
+          el.onclick = (function(dia) {
+            return function() { seleccionarDia(dia); };
+          })(d);
+        }
+        grid.appendChild(el);
+      }
+    }
+
+    function seleccionarDia(d) {
+      diaSeleccionat = new Date(any, mes, d);
+      horaSeleccionada = null;
+      document.getElementById("confirmacio").classList.remove("visible");
+      renderCalendari();
+      renderHores();
+      document.getElementById("horesContainer").style.display = "block";
+    }
+
+    function renderHores() {
+      const grid = document.getElementById("horesGrid");
+      grid.innerHTML = "";
+      horesDisponibles.forEach(function(h) {
+        const btn = document.createElement("button");
+        btn.className = "hora-btn" + (horaSeleccionada === h ? " selected" : "");
+        btn.textContent = h;
+        btn.onclick = function() { horaSeleccionada = h; renderHores(); };
+        grid.appendChild(btn);
+      });
+    }
+
+    function canviarMes(delta) {
+      mes += delta;
+      if (mes < 0) { mes = 11; any--; }
+      if (mes > 11) { mes = 0; any++; }
+      renderCalendari();
+    }
+
+    function confirmarCita() {
+      const nom = document.getElementById("nomClient").value.trim();
+      const tel = document.getElementById("telClient").value.trim();
+      const servei = document.getElementById("serveiCita").value;
+      const conf = document.getElementById("confirmacio");
+
+      if (!diaSeleccionat) { alert("Tria un dia al calendari."); return; }
+      if (!horaSeleccionada) { alert("Tria una hora."); return; }
+      if (!nom) { alert("Introdueix el teu nom."); return; }
+      if (!tel) { alert("Introdueix el teu telèfon."); return; }
+      if (!servei) { alert("Selecciona un servei."); return; }
+
+      const dies = ["Diumenge","Dilluns","Dimarts","Dimecres","Dijous","Divendres","Dissabte"];
+      const dataStr = dies[diaSeleccionat.getDay()] + " " + diaSeleccionat.getDate() + " de " + mesos[diaSeleccionat.getMonth()] + " de " + diaSeleccionat.getFullYear();
+
+      conf.innerHTML = "<strong>✅ Cita confirmada!</strong><br>👤 " + nom + "<br>📞 " + tel + "<br>🔧 " + servei + "<br>📅 " + dataStr + " a les " + horaSeleccionada;
+      conf.classList.add("visible");
+
+      document.getElementById("nomClient").value = "";
+      document.getElementById("telClient").value = "";
+      document.getElementById("serveiCita").value = "";
+      diaSeleccionat = null;
+      horaSeleccionada = null;
+      document.getElementById("horesContainer").style.display = "none";
+      renderCalendari();
+    }
+
+    var mediaRecorder;
+    var audioChunks = [];
+    var audioBlob = null;
+
+    function iniciarGravacio() {
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        mediaRecorder.ondataavailable = function(e) { audioChunks.push(e.data); };
+        mediaRecorder.onstop = function() {
+          audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+          var url = URL.createObjectURL(audioBlob);
+          document.getElementById("audioPreview").src = url;
+          document.getElementById("audioPreview").style.display = "block";
+          document.getElementById("btnAturar").style.display = "none";
+          document.getElementById("btnGravar").style.display = "inline-block";
+          document.getElementById("audioEtiquet").textContent = "✅ Àudio gravat!";
+        };
+        mediaRecorder.start();
+        document.getElementById("btnGravar").style.display = "none";
+        document.getElementById("btnAturar").style.display = "inline-block";
+        document.getElementById("audioEtiquet").textContent = "🔴 Gravant...";
+        document.getElementById("audioPreview").style.display = "none";
+      }).catch(function() {
+        alert("No s'ha pogut accedir al micròfon.");
+      });
+    }
+
+    function aturarGravacio() {
+      if (mediaRecorder) mediaRecorder.stop();
+    }
+
+    function enviarConsulta() {
+      var nom = document.getElementById("consultaNom").value.trim();
+      var text = document.getElementById("consultaText").value.trim();
+      if (!nom) { alert("Introdueix el teu nom."); return; }
+      if (!text && !audioBlob) { alert("Escriu el problema o grava un àudio."); return; }
+      var missatge = "Hola! Soc " + nom + ".";
+      if (text) missatge += "\n\n" + text;
+      if (audioBlob) missatge += "\n\n🎙️ T'envio també un àudio explicant el problema.";
+      missatge += "\n\n_(Consulta des de la app GoldenBikes)_";
+      var url = "https://wa.me/34665953779?text=" + encodeURIComponent(missatge);
+      window.open(url, "_blank");
+    }
+
+    function compartirApp() {
+      if (navigator.share) {
+        navigator.share({ title: "GoldenBikes", text: "Especialistes en reparació de bicicletes desde 1996. Demana la teva cita aquí!", url: window.location.href });
+      } else {
+        navigator.clipboard.writeText(window.location.href).then(function() {
+          alert("✅ Enllaç copiat!");
+        });
+      }
+    }
+
+    renderCalendari();
+  </script>
+</body>
+</html>
