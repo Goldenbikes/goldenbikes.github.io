@@ -557,18 +557,6 @@
   }
   actualitzarSelectServeis();
 
-  function afegirServei() {
-    let text = document.getElementById("nouServei").value.trim();
-    if (!text) return;
-    let llista = document.querySelector("#serveisList");
-    let nouElement = document.createElement("li");
-    nouElement.textContent = text;
-    llista.appendChild(nouElement);
-    serveis.push(text);
-    actualitzarSelectServeis();
-    document.getElementById("nouServei").value = "";
-    document.getElementById("nouServei").focus();
-  }
 
   function canviarMode() {
     document.body.classList.toggle("fosc");
